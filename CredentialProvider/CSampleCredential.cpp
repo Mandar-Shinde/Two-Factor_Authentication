@@ -16,6 +16,8 @@
 #include "CSampleCredential.h"
 #include "guid.h"
 
+#include "tinyxml2.h"
+
 // CSampleCredential ////////////////////////////////////////////////////////
 
 CSampleCredential::CSampleCredential():
