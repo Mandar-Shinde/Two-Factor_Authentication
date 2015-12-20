@@ -12,53 +12,56 @@
 
 #include "helpers.h"
 #include <intsafe.h>
+#include <WinReg.h>
+#include <windows.h>
+#include <string>
 
 // 
 // Copies the field descriptor pointed to by rcpfd into a buffer allocated 
 // using CoTaskMemAlloc. Returns that buffer in ppcpfd.
 // 
 HRESULT FieldDescriptorCoAllocCopy(
-    const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR& rcpfd,
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd
-    )
+	const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR& rcpfd,
+	CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR** ppcpfd
+	)
 {
-    HRESULT hr;
-    DWORD cbStruct = sizeof(CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR);
+	HRESULT hr;
+	DWORD cbStruct = sizeof(CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR);
 
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* pcpfd = 
-        (CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR*)CoTaskMemAlloc(cbStruct);
+	CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* pcpfd =
+		(CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR*)CoTaskMemAlloc(cbStruct);
 
-    if (pcpfd)
-    {
-        pcpfd->dwFieldID = rcpfd.dwFieldID;
-        pcpfd->cpft = rcpfd.cpft;
-        
-        if (rcpfd.pszLabel)
-        {
-            hr = SHStrDupW(rcpfd.pszLabel, &pcpfd->pszLabel);
-        }
-        else
-        {
-            pcpfd->pszLabel = NULL;
-            hr = S_OK;
-        }
-    }
-    else
-    {
-        hr = E_OUTOFMEMORY;
-    }
-    if (SUCCEEDED(hr))
-    {
-        *ppcpfd = pcpfd;
-    }
-    else
-    {
-        CoTaskMemFree(pcpfd);  
-        *ppcpfd = NULL;
-    }
+	if (pcpfd)
+	{
+		pcpfd->dwFieldID = rcpfd.dwFieldID;
+		pcpfd->cpft = rcpfd.cpft;
+
+		if (rcpfd.pszLabel)
+		{
+			hr = SHStrDupW(rcpfd.pszLabel, &pcpfd->pszLabel);
+		}
+		else
+		{
+			pcpfd->pszLabel = NULL;
+			hr = S_OK;
+		}
+	}
+	else
+	{
+		hr = E_OUTOFMEMORY;
+	}
+	if (SUCCEEDED(hr))
+	{
+		*ppcpfd = pcpfd;
+	}
+	else
+	{
+		CoTaskMemFree(pcpfd);
+		*ppcpfd = NULL;
+	}
 
 
-    return hr;
+	return hr;
 }
 
 //
@@ -67,32 +70,32 @@ HRESULT FieldDescriptorCoAllocCopy(
 // pcpfd->pszLabel.
 //
 HRESULT FieldDescriptorCopy(
-    const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR& rcpfd,
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* pcpfd
-    )
+	const CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR& rcpfd,
+	CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR* pcpfd
+	)
 {
-    HRESULT hr;
-    CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR cpfd;
+	HRESULT hr;
+	CREDENTIAL_PROVIDER_FIELD_DESCRIPTOR cpfd;
 
-    cpfd.dwFieldID = rcpfd.dwFieldID;
-    cpfd.cpft = rcpfd.cpft;
+	cpfd.dwFieldID = rcpfd.dwFieldID;
+	cpfd.cpft = rcpfd.cpft;
 
-    if (rcpfd.pszLabel)
-    {
-        hr = SHStrDupW(rcpfd.pszLabel, &cpfd.pszLabel);
-    }
-    else
-    {
-        cpfd.pszLabel = NULL;
-        hr = S_OK;
-    }
+	if (rcpfd.pszLabel)
+	{
+		hr = SHStrDupW(rcpfd.pszLabel, &cpfd.pszLabel);
+	}
+	else
+	{
+		cpfd.pszLabel = NULL;
+		hr = S_OK;
+	}
 
-    if (SUCCEEDED(hr))
-    {
-        *pcpfd = cpfd;
-    }
+	if (SUCCEEDED(hr))
+	{
+		*pcpfd = cpfd;
+	}
 
-    return hr;
+	return hr;
 }
 
 //
@@ -103,45 +106,45 @@ HRESULT FieldDescriptorCopy(
 // exact GetSerialization call where the sample uses it.
 //
 HRESULT UnicodeStringInitWithString(
-    PWSTR pwz, 
-    UNICODE_STRING* pus
-    )
+	PWSTR pwz,
+	UNICODE_STRING* pus
+	)
 {
-    HRESULT hr;
-    if (pwz)
-    {
-        size_t lenString;
-        hr = StringCchLengthW(pwz, USHORT_MAX, &(lenString));
-        if (SUCCEEDED(hr))
-        {
-            USHORT usCharCount;
-            hr = SizeTToUShort(lenString, &usCharCount);
-            if (SUCCEEDED(hr))
-            {
-                USHORT usSize;
-                hr = SizeTToUShort(sizeof(WCHAR), &usSize);
-                if (SUCCEEDED(hr))
-                {
-                    hr = UShortMult(usCharCount, usSize, &(pus->Length)); // Explicitly NOT including NULL terminator
-                    if (SUCCEEDED(hr))
-                    {
-                        pus->MaximumLength = pus->Length;
-                        pus->Buffer = pwz;
-                        hr = S_OK;
-                    }
-                    else
-                    {
-                        hr = HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        hr = E_INVALIDARG;
-    }
-    return hr;
+	HRESULT hr;
+	if (pwz)
+	{
+		size_t lenString;
+		hr = StringCchLengthW(pwz, USHORT_MAX, &(lenString));
+		if (SUCCEEDED(hr))
+		{
+			USHORT usCharCount;
+			hr = SizeTToUShort(lenString, &usCharCount);
+			if (SUCCEEDED(hr))
+			{
+				USHORT usSize;
+				hr = SizeTToUShort(sizeof(WCHAR), &usSize);
+				if (SUCCEEDED(hr))
+				{
+					hr = UShortMult(usCharCount, usSize, &(pus->Length)); // Explicitly NOT including NULL terminator
+					if (SUCCEEDED(hr))
+					{
+						pus->MaximumLength = pus->Length;
+						pus->Buffer = pwz;
+						hr = S_OK;
+					}
+					else
+					{
+						hr = HRESULT_FROM_WIN32(ERROR_ARITHMETIC_OVERFLOW);
+					}
+				}
+			}
+		}
+	}
+	else
+	{
+		hr = E_INVALIDARG;
+	}
+	return hr;
 }
 
 //
@@ -152,16 +155,16 @@ HRESULT UnicodeStringInitWithString(
 // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/secauthn/security/unicode_string.asp
 //
 static void _UnicodeStringPackedUnicodeStringCopy(
-    const UNICODE_STRING& rus,
-    PWSTR pwzBuffer,
-    UNICODE_STRING* pus
-    )
+	const UNICODE_STRING& rus,
+	PWSTR pwzBuffer,
+	UNICODE_STRING* pus
+	)
 {
-    pus->Length = rus.Length;
-    pus->MaximumLength = rus.Length;
-    pus->Buffer = pwzBuffer;
+	pus->Length = rus.Length;
+	pus->MaximumLength = rus.Length;
+	pus->Buffer = pwzBuffer;
 
-    CopyMemory(pus->Buffer, rus.Buffer, pus->Length);
+	CopyMemory(pus->Buffer, rus.Buffer, pus->Length);
 }
 
 //
@@ -183,57 +186,57 @@ static void _UnicodeStringPackedUnicodeStringCopy(
 //
 
 HRESULT KerbInteractiveLogonPack(
-    const KERB_INTERACTIVE_LOGON& rkil,
-    BYTE** prgb,
-    DWORD* pcb
-    )
+	const KERB_INTERACTIVE_LOGON& rkil,
+	BYTE** prgb,
+	DWORD* pcb
+	)
 {
-    HRESULT hr;
+	HRESULT hr;
 
-    // alloc space for struct plus extra for the three strings
-    DWORD cb = sizeof(rkil) +
-        rkil.LogonDomainName.Length +
-        rkil.UserName.Length +
-        rkil.Password.Length;
+	// alloc space for struct plus extra for the three strings
+	DWORD cb = sizeof(rkil) +
+		rkil.LogonDomainName.Length +
+		rkil.UserName.Length +
+		rkil.Password.Length;
 
-    KERB_INTERACTIVE_LOGON* pkil = (KERB_INTERACTIVE_LOGON*)CoTaskMemAlloc(cb);
-    
-    if (pkil)
-    {
-        pkil->MessageType = rkil.MessageType;
+	KERB_INTERACTIVE_LOGON* pkil = (KERB_INTERACTIVE_LOGON*)CoTaskMemAlloc(cb);
 
-        //
-        // point pbBuffer at the beginning of the extra space
-        //
-        BYTE* pbBuffer = (BYTE*)pkil + sizeof(KERB_INTERACTIVE_LOGON);
+	if (pkil)
+	{
+		pkil->MessageType = rkil.MessageType;
 
-        //
-        // copy each string,
-        // fix up appropriate buffer pointer to be offset,
-        // advance buffer pointer over copied characters in extra space
-        //
-        _UnicodeStringPackedUnicodeStringCopy(rkil.LogonDomainName, (PWSTR)pbBuffer, &pkil->LogonDomainName);
-        pkil->LogonDomainName.Buffer = (PWSTR)(pbBuffer - (BYTE*)pkil);
-        pbBuffer += pkil->LogonDomainName.Length;
+		//
+		// point pbBuffer at the beginning of the extra space
+		//
+		BYTE* pbBuffer = (BYTE*)pkil + sizeof(KERB_INTERACTIVE_LOGON);
 
-        _UnicodeStringPackedUnicodeStringCopy(rkil.UserName, (PWSTR)pbBuffer, &pkil->UserName);
-        pkil->UserName.Buffer = (PWSTR)(pbBuffer - (BYTE*)pkil);
-        pbBuffer += pkil->UserName.Length;
+		//
+		// copy each string,
+		// fix up appropriate buffer pointer to be offset,
+		// advance buffer pointer over copied characters in extra space
+		//
+		_UnicodeStringPackedUnicodeStringCopy(rkil.LogonDomainName, (PWSTR)pbBuffer, &pkil->LogonDomainName);
+		pkil->LogonDomainName.Buffer = (PWSTR)(pbBuffer - (BYTE*)pkil);
+		pbBuffer += pkil->LogonDomainName.Length;
 
-        _UnicodeStringPackedUnicodeStringCopy(rkil.Password, (PWSTR)pbBuffer, &pkil->Password);
-        pkil->Password.Buffer = (PWSTR)(pbBuffer - (BYTE*)pkil);
+		_UnicodeStringPackedUnicodeStringCopy(rkil.UserName, (PWSTR)pbBuffer, &pkil->UserName);
+		pkil->UserName.Buffer = (PWSTR)(pbBuffer - (BYTE*)pkil);
+		pbBuffer += pkil->UserName.Length;
 
-        *prgb = (BYTE*)pkil;
-        *pcb = cb;
+		_UnicodeStringPackedUnicodeStringCopy(rkil.Password, (PWSTR)pbBuffer, &pkil->Password);
+		pkil->Password.Buffer = (PWSTR)(pbBuffer - (BYTE*)pkil);
 
-        hr = S_OK;
-    }
-    else
-    {
-        hr = E_OUTOFMEMORY;
-    }
+		*prgb = (BYTE*)pkil;
+		*pcb = cb;
 
-    return hr;
+		hr = S_OK;
+	}
+	else
+	{
+		hr = E_OUTOFMEMORY;
+	}
+
+	return hr;
 }
 
 // 
@@ -242,16 +245,16 @@ HRESULT KerbInteractiveLogonPack(
 //
 HRESULT LsaInitString(PSTRING pszDestinationString, PCSTR pszSourceString)
 {
-    USHORT usLength;
-    HRESULT hr = StringCchLength(pszSourceString, USHORT_MAX, (size_t *) &usLength);
-    if (SUCCEEDED(hr))
-    {
-        pszDestinationString->Buffer = (PCHAR)pszSourceString;
-        pszDestinationString->Length = usLength;
-        pszDestinationString->MaximumLength = pszDestinationString->Length+1;
-        hr = S_OK;
-    }
-    return hr;
+	USHORT usLength;
+	HRESULT hr = StringCchLength(pszSourceString, USHORT_MAX, (size_t *)&usLength);
+	if (SUCCEEDED(hr))
+	{
+		pszDestinationString->Buffer = (PCHAR)pszSourceString;
+		pszDestinationString->Length = usLength;
+		pszDestinationString->MaximumLength = pszDestinationString->Length + 1;
+		hr = S_OK;
+	}
+	return hr;
 }
 
 //
@@ -261,33 +264,132 @@ HRESULT LsaInitString(PSTRING pszDestinationString, PCSTR pszSourceString)
 //
 HRESULT RetrieveNegotiateAuthPackage(ULONG * pulAuthPackage)
 {
-    HRESULT hr;
-    HANDLE hLsa;
+	HRESULT hr;
+	HANDLE hLsa;
 
-    NTSTATUS status = LsaConnectUntrusted(&hLsa);
-    if (SUCCEEDED(HRESULT_FROM_NT(status)))
-    {
-        
-        ULONG ulAuthPackage;
-        LSA_STRING lsaszKerberosName;
-        LsaInitString(&lsaszKerberosName, NEGOSSP_NAME);
+	NTSTATUS status = LsaConnectUntrusted(&hLsa);
+	if (SUCCEEDED(HRESULT_FROM_NT(status)))
+	{
 
-        status = LsaLookupAuthenticationPackage(hLsa, &lsaszKerberosName, &ulAuthPackage);
-        if (SUCCEEDED(HRESULT_FROM_NT(status)))
-        {
-            *pulAuthPackage = ulAuthPackage;
-            hr = S_OK;
-        }
-        else
-        {
-            hr = HRESULT_FROM_NT(status);
-        }
-        LsaDeregisterLogonProcess(hLsa);
-    }
-    else
-    {
-        hr= HRESULT_FROM_NT(status);
-    }
+		ULONG ulAuthPackage;
+		LSA_STRING lsaszKerberosName;
+		LsaInitString(&lsaszKerberosName, NEGOSSP_NAME);
 
-    return hr;
+		status = LsaLookupAuthenticationPackage(hLsa, &lsaszKerberosName, &ulAuthPackage);
+		if (SUCCEEDED(HRESULT_FROM_NT(status)))
+		{
+			*pulAuthPackage = ulAuthPackage;
+			hr = S_OK;
+		}
+		else
+		{
+			hr = HRESULT_FROM_NT(status);
+		}
+		LsaDeregisterLogonProcess(hLsa);
+	}
+	else
+	{
+		hr = HRESULT_FROM_NT(status);
+	}
+
+	return hr;
+}
+
+
+////////////////////////////////////////////////////////////////////
+//
+// Registry Helper
+//
+////////////////////////////////////////////////////////////////////
+
+
+
+CString GetRegistryValue(HKEY hBaseKey, CString strKeyName, CString strValue)
+{
+	HKEY hKey = 0;
+	CString strReturnVal;
+	if (RegOpenKeyEx(hBaseKey,
+		strKeyName,
+		0,
+		KEY_READ | KEY_EXECUTE,
+		&hKey) != ERROR_SUCCESS)
+	{
+		return CString();
+	}
+
+	ULONG cbData = MAX_PATH;
+	char szData[MAX_PATH] = { 0 };
+	if (RegQueryValueEx(hKey,
+		strValue,
+		0,
+		NULL,
+		(LPBYTE)szData,
+		&cbData) == ERROR_SUCCESS)
+	{
+
+		LPSTR c = UnicodeToAnsi((LPCWSTR)szData);
+		strReturnVal = c;
+	}
+
+	RegCloseKey(hKey);
+
+	return strReturnVal;
+}
+
+bool SetRegistryValue(HKEY hBaseKey, CString strKeyName, CString strName, CString strValue)
+{
+	HKEY hKey = 0;
+	CString strReturnVal;
+	ULONG cbData;
+	if (RegOpenKeyEx(hBaseKey,
+		strKeyName,
+		0,
+		KEY_ALL_ACCESS,
+		&hKey) != ERROR_SUCCESS)
+	{
+		return false;
+	}
+
+	cbData = MAX_PATH;
+	if (RegSetValueEx(
+		hKey,
+		strName,
+		0,
+		REG_SZ,
+		(LPBYTE)strValue.GetBuffer(strValue.GetLength()),
+		strValue.GetLength() * 2 + 1
+		)
+		== ERROR_SUCCESS)
+	{
+		RegCloseKey(hKey);
+		return true;
+	}
+
+	RegCloseKey(hKey);
+	return false;
+}
+
+
+LPSTR UnicodeToAnsi(LPCWSTR s)
+{
+	if (s == NULL)
+		return NULL;
+	int cw = lstrlenW(s);
+	if (cw == 0)
+	{
+		CHAR *psz = new CHAR[1];
+		*psz = '\0';
+		return psz;
+	}
+	int cc = WideCharToMultiByte(CP_ACP, 0, s, cw, NULL, 0, NULL, NULL);
+	if (cc == 0)
+		return NULL;
+	CHAR *psz = new CHAR[cc + 1];
+	cc = WideCharToMultiByte(CP_ACP, 0, s, cw, psz, cc, NULL, NULL);
+	if (cc == 0) {
+		delete[] psz;
+		return NULL;
+	}
+	psz[cc] = '\0';
+	return psz;
 }
