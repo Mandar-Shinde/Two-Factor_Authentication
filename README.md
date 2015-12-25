@@ -1,4 +1,5 @@
-# CredentialProvider
+### Two-Factor Authentication 
+###### Client Module For Windows Machine
 
  1. Credential Provider Sample
  2. Credential Test Project
