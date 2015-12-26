@@ -483,6 +483,7 @@ HRESULT CSampleCredential::GetSerialization(
                 {
                     //
                     // Allocate copies of, and package, the strings in a binary blob.
+                    // sending details to the auth server for verification
                     //
                     kil.MessageType = KerbInteractiveLogon;
                     hr = KerbInteractiveLogonPack(kil, &pcpcs->rgbSerialization, &pcpcs->cbSerialization);
