@@ -1,4 +1,5 @@
 ### Two-Factor Authentication 
+![alt tag](https://raw.githubusercontent.com/Mandar-Shinde/Two-Factor_Authentication/master/logon.png)
 ###### Client Module For Windows Machine
 
  1. Credential Provider Sample
